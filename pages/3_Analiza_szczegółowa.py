@@ -2,8 +2,11 @@ import streamlit as st
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from matplotlib.colors import LinearSegmentedColormap
 from wordcloud import WordCloud
 
 st.set_page_config(page_title="Sleep, Mood & Messages", layout="wide")
@@ -224,6 +227,10 @@ with tab2:
         sen = pd.read_csv(PATH_SLEEP)
         sent = pd.read_csv(PATH_SENTIMENT, sep=";")
         
+        sent = sent[
+            (sent["date"] >= "2023-11-17") &
+            (sent["date"] <= "2024-01-10")]
+
         sen["date"] = pd.to_datetime(sen["date"], errors="coerce")
         sen["duration"] = pd.to_numeric(sen["duration"], errors="coerce")
         sent["date"] = pd.to_datetime(sent["date"], errors="coerce")
@@ -289,7 +296,6 @@ with tab2:
         fig.update_yaxes(title_text="Średnia długość snu (godz.)", secondary_y=False)
         fig.update_yaxes(title_text="Średni sentyment (0 - 1)", range = [0,1], secondary_y=True, griddash='dot', gridcolor="#580741")
 
-
         fig.update_layout(
             title="Sen a sentyment według dnia",
             legend=dict(
@@ -327,13 +333,11 @@ with tab2:
         sen["bed_min"] = sen["went_to_bed"].apply(time_to_minutes)            
         sen["wake_min"] = sen["woke_up"].apply(time_to_minutes)
 
-        # Zmiana godzin po północy: np. 00:50 traktujemy jako 24:50
         sen["bed_min_adj"] = sen["bed_min"]
         mask_after_midnight = sen["bed_min_adj"].notna() & (sen["bed_min_adj"] < 12 * 60)
         sen.loc[mask_after_midnight, "bed_min_adj"] = sen.loc[mask_after_midnight, "bed_min_adj"] + 24 * 60
-
-        # Wykresy        
-        bed_ticks = list(range(20 * 60, 28 * 60 + 1, 60))  # 20:00...04:00
+    
+        bed_ticks = list(range(20 * 60, 28 * 60 + 1, 60))  
 
         fig_bed_time = go.Figure()
         fig_bed_time.add_trace(
@@ -366,7 +370,7 @@ with tab2:
 
         st.plotly_chart(fig_bed_time, use_container_width=True)
 
-        wake_ticks = list(range(4 * 60, 12 * 60 + 1, 60))  # 04:00...12:00
+        wake_ticks = list(range(4 * 60, 12 * 60 + 1, 60))  
 
         fig_wake_time = go.Figure()
         fig_wake_time.add_trace(
@@ -399,7 +403,7 @@ with tab2:
 
         st.plotly_chart(fig_wake_time, use_container_width=True)
 
-        # Boxploty wg dnia tygodnia 
+
         st.markdown('<div class="animate-enter"><h2>Rozkład godzin według dnia tygodnia</h1></div>', unsafe_allow_html=True)
         
         fig_bed = go.Figure(
@@ -414,7 +418,8 @@ with tab2:
         fillcolor="rgba(124,92,255,0.35)",
         line=dict(color="#3B5CCC", width=2),
         marker=dict(color="#3B5CCC", size=5, opacity=0.6)
-    )
+        )
+
         fig_bed.update_layout(showlegend=False, **PLOTLY_LAYOUT)
 
         fig_bed.update_xaxes(title_text="Dzień tygodnia")
@@ -433,8 +438,7 @@ with tab2:
 
         st.plotly_chart(fig_bed, use_container_width=True)
 
-        # Wakeup boxplot
-        wake_ticks = list(range(4 * 60, 13 * 60 + 1, 60))  # 04:00 ... 13:00
+        wake_ticks = list(range(4 * 60, 13 * 60 + 1, 60)) 
 
         fig_wake = go.Figure(
             data=go.Box(
@@ -448,7 +452,8 @@ with tab2:
         fillcolor="rgba(197,27,125,0.28)",
         line=dict(color="#C51B7D", width=2),
         marker=dict(color="#C51B7D", size=5, opacity=0.6)
-    )
+        )
+
         fig_wake.update_layout(showlegend=False, **PLOTLY_LAYOUT)
 
         fig_wake.update_xaxes(title_text="Dzień tygodnia")
@@ -470,7 +475,6 @@ with tab2:
     else:
         st.info(f"Brak danych sentymentu dla użytkownika: {selected_person} (Szukano pliku: {PATH_SENTIMENT})")
 
-
 with tab3:
     if os.path.exists(PATH_SPOTIFY_HIST):
         sen = pd.read_csv(PATH_SLEEP)
@@ -482,7 +486,12 @@ with tab3:
         sent["sentiment"] = pd.to_numeric(sent["sentiment"], errors="coerce")
         sent["datetime"] = pd.to_datetime(sent["datetime"], errors="coerce")
         sent["hour"] = sent["datetime"].dt.hour
-          
+
+        sent = sent[
+            (sent["date"] >= "2023-11-17") &
+            (sent["date"] <= "2024-01-10")
+            ]
+    
         order = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
         daynum_to_pl = {
             0: "poniedziałek", 1: "wtorek", 2: "środa",
@@ -537,7 +546,6 @@ with tab3:
             col1.metric("Średni sentyment", f"{sent_day['sentiment'].mean():.2f}")
             col2.metric("Łączna liczba wiadomości", total_messages)
             col3.metric("Średnio wiadomości na dzień", f"{avg_messages_per_day:.1f}")         
-
 
         st.markdown('<div class="animate-enter"><h3>Heatmapa aktywności w ciągu wybranego dnia tygodnia</h1></div>', unsafe_allow_html=True)
     
