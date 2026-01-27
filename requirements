@@ -1,7 +1,5 @@
-streamlit 
-os
-pandas 
-matplotlib.pyplot
-plotly.graph_objects 
-plotly.subplots
-wordcloud 
+streamlit
+pandas
+matplotlib
+plotly
+wordcloud
