@@ -302,4 +302,4 @@ else:
 
 st.markdown("---")
 if st.button("⬅ Wróć do menu głównego"):
-    st.switch_page("3_Analiza_szczegółowa.py")
+    st.switch_page("pages/3_Analiza_szczegółowa.py")

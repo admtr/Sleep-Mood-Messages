@@ -165,4 +165,4 @@ st.subheader("Autorzy")
 st.write("Aleksandra Dmitruk, Wiktoria Postek, Adam Bagiński")
 
 if st.button("➡ Przejdź do dashboardu (osoba)"):
-    st.switch_page("3_Analiza_szczegółowa.py")
+    st.switch_page("pages/3_Analiza_szczegółowa.py")
